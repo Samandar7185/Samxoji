@@ -46,7 +46,6 @@ with tab1:
         with st.spinner("Video yuklanmoqda..."):
             with open("input_video.mp4", "wb") as f:
                 f.write(uploaded_video.read())
-        # st.video("input_video.mp4")  # Video avtomatik ijro qilinmaydi
         if st.button("Subtitl yaratish", use_container_width=True):
             progress_placeholder = st.empty()
             status_placeholder = st.empty()
@@ -288,4 +287,5 @@ st.markdown("<p style='text-align:center; color:#94a3b8;'>© 2024 O‘zbekcha Su
 # Agar bu yozuv uzoq vaqt turib qolsa:
 # 1. Internet tezligini tekshiring.
 # 2. Fayllarda xatolik yo‘qligini va requirements.txt to‘g‘ri ekanini tekshiring.
+# 3. Dastur loglarida (Streamlit Cloud sahifasida) xatolik bo‘lsa, shu chatga yuboring – yordam beraman.
 # 3. Dastur loglarida (Streamlit Cloud sahifasida) xatolik bo‘lsa, shu chatga yuboring – yordam beraman.

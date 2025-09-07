@@ -5,7 +5,7 @@ import whisper
 from deep_translator import GoogleTranslator
 import shutil
 
-FFMPEG_PATH = "ffmpeg"  # faqat nomi, to‘liq yo‘l emas
+FFMPEG_PATH = "ffmpeg"
 
 def check_ffmpeg():
     if shutil.which(FFMPEG_PATH) is None:
@@ -16,7 +16,6 @@ def check_ffmpeg():
     return True
 
 def set_ffmpeg_in_path():
-    # Onlayn serverlarda kerak emas, lekin lokal uchun qoldirilgan
     pass
 
 def generate_subtitles(video_path, progress_callback=None):
@@ -99,11 +98,4 @@ def burn_subtitles(video_path, srt_path):
         subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return out_path
     except Exception:
-        return None
-    ]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        return out_path
-    except Exception:
-        return None
         return None
