@@ -99,3 +99,6 @@ def burn_subtitles(video_path, srt_path):
         return out_path
     except Exception:
         return None
+
+# Bu faylda 200MB limit yoki fayl hajmi cheklovi yo‘q.
+# Agar ilgari limit bo'lgan kod bo'lsa, u olib tashlangan.
