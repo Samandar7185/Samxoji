@@ -4,36 +4,55 @@ import subprocess
 import whisper
 from deep_translator import GoogleTranslator
 import shutil
+import sys
 
+# FFmpeg ni topish uchun funksiya - Streamlit Cloud uchun moslashtirilgan
 def get_ffmpeg_path():
-    # FFmpeg ni avtomatik topish
-    ffmpeg_path = shutil.which("ffmpeg")
-    if ffmpeg_path:
-        return ffmpeg_path
+    # Streamlit Cloud'da FFmpeg yo'llari
+    possible_paths = [
+        "/usr/bin/ffmpeg",
+        "/bin/ffmpeg",
+        "/app/bin/ffmpeg",
+        "/opt/conda/bin/ffmpeg",
+        "ffmpeg"
+    ]
     
-    # Windows uchun qo'shimcha tekshirish
-    if os.name == 'nt':
-        possible_paths = [
-            r"C:\ffmpeg\bin\ffmpeg.exe",
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe",
-            r"C:\tools\ffmpeg\bin\ffmpeg.exe",
-        ]
-        for path in possible_paths:
-            if os.path.exists(path):
-                return path
+    for path in possible_paths:
+        if shutil.which(path):
+            return path
     
-    raise FileNotFoundError(
-        "FFmpeg topilmadi! Iltimos, FFmpeg ni o'rnating:\n"
-        "Windows: https://www.gyan.dev/ffmpeg/builds/\n"
-        "macOS: brew install ffmpeg\n"
-        "Linux: sudo apt install ffmpeg"
-    )
+    # Agar FFmpeg topilmasa, moviepy yoki audio processing uchun alternativ
+    try:
+        import moviepy.editor as mp
+        return None  # Moviepy mavjud
+    except ImportError:
+        # Streamlit Cloud'da FFmpeg yo'qligi haqida xabar
+        print("FFmpeg topilmadi! Moviepy yordamida ishlaymiz...")
+        return None
 
 FFMPEG_PATH = get_ffmpeg_path()
 
 def check_ffmpeg():
-    # FFmpeg mavjudligini tekshirish
+    if FFMPEG_PATH is None:
+        # Moviepy yoki boshqa kutubxona bilan ishlash
+        try:
+            import moviepy.editor as mp
+            return True
+        except ImportError:
+            # Moviepy ham yo'q, audio processing uchun alternativ
+            try:
+                import pydub
+                return True
+            except ImportError:
+                raise Exception(
+                    "FFmpeg topilmadi! Iltimos, quyidagilardan birini bajaring:\n"
+                    "1. requirements.txt ga 'moviepy' qo'shing\n"
+                    "2. Yoki lokalda FFmpeg ni o'rnating\n"
+                    "3. Streamlit Cloud'da FFmpeg avtomatik o'rnatilgan bo'lishi kerak"
+                )
+    
     try:
+        # FFmpeg mavjudligini tekshirish
         result = subprocess.run([FFMPEG_PATH, "-version"], 
                               capture_output=True, text=True, timeout=5)
         return result.returncode == 0
@@ -41,33 +60,50 @@ def check_ffmpeg():
         return False
 
 def extract_audio(video_path, audio_path):
-    """Audio ajratish funksiyasi"""
+    """Audio ajratish funksiyasi - FFmpeg yoki alternativ usullar"""
+    if FFMPEG_PATH and check_ffmpeg():
+        # FFmpeg bilan audio ajratish
+        try:
+            subprocess.run([
+                FFMPEG_PATH, "-y", "-i", video_path, 
+                "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", 
+                audio_path
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True, timeout=300)
+            return True
+        except:
+            # FFmpeg bilan xatolik, alternativ usulga o'tish
+            pass
+    
+    # Moviepy yordamida audio ajratish
     try:
-        subprocess.run([
-            FFMPEG_PATH, "-y", "-i", video_path, 
-            "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", 
-            audio_path
-        ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        import moviepy.editor as mp
+        video = mp.VideoFileClip(video_path)
+        video.audio.write_audiofile(audio_path, fps=16000, verbose=False, logger=None)
+        video.close()
         return True
-    except subprocess.CalledProcessError as e:
-        print(f"Audio ajratishda xatolik: {e}")
-        return False
     except Exception as e:
-        print(f"Xatolik: {e}")
-        return False
+        print(f"Moviepy bilan audio ajratishda xatolik: {e}")
+        # So'nggi imkoniyat - pydub
+        try:
+            from pydub import AudioSegment
+            video = AudioSegment.from_file(video_path)
+            video.export(audio_path, format="wav", parameters=["-ar", "16000", "-ac", "1"])
+            return True
+        except:
+            raise Exception(f"Audio ajratish mumkin emas: {str(e)}")
 
 def generate_subtitles(video_path, model_size="base", progress_callback=None):
-    if not check_ffmpeg():
-        raise FileNotFoundError("FFmpeg topilmadi! Iltimos, FFmpeg ni o'rnating.")
-    
-    audio_path = tempfile.mktemp(suffix=".wav")
-    
     if progress_callback:
         progress_callback(5)
     
+    audio_path = tempfile.mktemp(suffix=".wav")
+    
     # Audio ajratish
-    if not extract_audio(video_path, audio_path):
-        raise Exception("Audio ajratishda xatolik yuz berdi.")
+    try:
+        if not extract_audio(video_path, audio_path):
+            raise Exception("Audio ajratish mumkin emas")
+    except Exception as e:
+        raise Exception(f"Audio ajratishda xatolik: {str(e)}")
     
     if progress_callback:
         progress_callback(15)
@@ -171,6 +207,7 @@ def translate_subtitles(srt_path, dest_lang, progress_callback=None):
                 except Exception as e:
                     # Agar tarjima qilishda xatolik bo'lsa, original matnni qoldiramiz
                     fout.write(block[2] + "\n\n")
+                    print(f"Tarjima xatosi: {e}")
                 
                 if progress_callback:
                     p = int(100 * (i + 1) / total)
@@ -184,9 +221,13 @@ def translate_subtitles(srt_path, dest_lang, progress_callback=None):
     return out_path
 
 def burn_subtitles(video_path, srt_path):
+    # Streamlit Cloud'da FFmpeg bo'lmasa, bu funksiyani o'chirib qo'yamiz
+    if not FFMPEG_PATH or not check_ffmpeg():
+        raise Exception("FFmpeg topilmadi! Videoga subtitl biriktirish faqat lokalda ishlaydi.")
+    
     out_path = tempfile.mktemp(suffix=".mp4")
     
-    # SRT fayl yo'lini to'g'rilash (bo'shliqlar bo'lsa)
+    # SRT fayl yo'lini to'g'rilash
     srt_path_escaped = f"'{srt_path}'" if ' ' in srt_path else srt_path
     
     cmd = [
@@ -196,7 +237,7 @@ def burn_subtitles(video_path, srt_path):
     ]
     
     try:
-        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=600)
         return out_path
     except subprocess.CalledProcessError as e:
         print(f"FFmpeg xatosi: {e}")
