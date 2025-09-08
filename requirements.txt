@@ -1,7 +1,6 @@
-streamlit
-openai-whisper
-deep-translator
-moviepy
-ffmpeg-python
-torch
-torchaudio
+streamlit>=1.28.0
+openai-whisper>=20231117
+deep-translator>=1.11.4
+moviepy>=1.0.3
+ffmpeg-python>=0.2.0
+pydub>=0.25.1
