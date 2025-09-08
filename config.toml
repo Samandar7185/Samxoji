@@ -1,0 +1,8 @@
+[server]
+maxUploadSize = 5000  # 5GB gacha ruxsat
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+serverAddress = "localhost"
+serverPort = 8501
