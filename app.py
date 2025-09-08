@@ -940,9 +940,7 @@ with tab3:
 
     st.markdown("#### ✏️ Subtitl matnini onlayn tahrirlash va videoga bog'lash")
 
-    
-
-    uploaded_edit_srt = st.file_uploader("Subtitl (.srt) faylini yuklang", type=["srt"], key="edit_srt_upload")
+uploaded_edit_srt = st.file_uploader("Subtitl (.srt) faylini yuklang", type=["srt"], key="edit_srt_upload")
 
     srt_file = None
 
@@ -1018,4 +1016,400 @@ with tab3:
 
         
 
-        st.download_butto
+        st.download_button(
+
+            "✏️ Tahrirlangan subtitlni yuklab olish", 
+
+            edited_srt, 
+
+            file_name=edited_filename, 
+
+            use_container_width=True
+
+        )
+
+        
+
+        uploaded_edit_video = st.file_uploader(
+
+            "Videoni yuklang (ixtiyoriy, subtitlni video bilan biriktirish uchun)", 
+
+            type=["mp4", "mov", "avi"], 
+
+            key="edit_video_upload"
+
+        )
+
+        
+
+        if uploaded_edit_video:
+
+            video_size_mb = len(uploaded_edit_video.getvalue()) / (1024 * 1024)
+
+            
+
+            if video_size_mb > 100:
+
+                st.markdown(f"""
+
+                <div class='big-file-warning'>
+
+                    <h4>⚠️ Katta video fayli ({video_size_mb:.1f} MB)</h4>
+
+                    <p>Subtitl biriktirish biroz vaqt olishi mumkin...</p>
+
+                </div>
+
+                """, unsafe_allow_html=True)
+
+            
+
+            # Unikal video nomi yaratish
+
+            video_filename = generate_unique_filename(uploaded_edit_video.name, "edit_video")
+
+            safe_video_filename = get_safe_filename(video_filename)
+
+            
+
+            temp_video = safe_video_filename
+
+            with open(temp_video, "wb") as f:
+
+                f.write(uploaded_edit_video.getbuffer())
+
+            
+
+            # Tahrirlangan SRT faylini saqlash
+
+            temp_srt = generate_unique_filename("temp_edited.srt", "temp")
+
+            with open(temp_srt, "w", encoding="utf-8") as f:
+
+                f.write(edited_srt)
+
+            
+
+            if st.button("🎬 Videoga subtitl qo'shish", use_container_width=True):
+
+                with st.spinner("Videoga subtitl qo'shilmoqda..."):
+
+                    try:
+
+                        out_path = burn_subtitles(temp_video, temp_srt)
+
+                        if out_path and os.path.exists(out_path):
+
+                            output_size = get_file_size_mb(out_path)
+
+                            
+
+                            # Chiqish fayli nomi
+
+                            output_filename = generate_unique_filename("video_with_subtitles.mp4", "output")
+
+                            
+
+                            with open(out_path, "rb") as f:
+
+                                st.download_button(
+
+                                    f"🎥 Subtitlli videoni yuklab olish ({output_size:.1f} MB)", 
+
+                                    f, 
+
+                                    file_name=output_filename, 
+
+                                    use_container_width=True
+
+                                )
+
+                            
+
+                            st.success("✅ Tayyor!")
+
+                            
+
+                            st.markdown(f"""
+
+                            <div class='file-info'>
+
+                                <strong>🎬 Video fayli:</strong> {output_filename}<br>
+
+                                <strong>📊 Hajmi:</strong> {output_size:.1f} MB<br>
+
+                                <strong>✅ Status:</strong> Subtitl biriktirildi
+
+                            </div>
+
+                            """, unsafe_allow_html=True)
+
+                            
+
+                        else:
+
+                            st.error("Videoga subtitl qo'shishda xatolik.")
+
+                    except Exception as e:
+
+                        st.error(f"Xatolik: {str(e)}")
+
+            
+
+            # Vaqtinchalik fayllarni tozalash
+
+            try:
+
+                if os.path.exists(temp_srt):
+
+                    os.remove(temp_srt)
+
+                if os.path.exists(temp_video):
+
+                    os.remove(temp_video)
+
+            except:
+
+                pass
+
+    else:
+
+        st.info("Subtitl faylini yuklang yoki avvalgi bosqichda yarating/yuklang.")
+
+
+
+with tab4:
+
+    st.markdown("#### 🎬 Videoga subtitl biriktirish")
+
+    
+
+    uploaded_video2 = st.file_uploader("Videoni yuklang", type=["mp4", "mov", "avi"], key="video_upload_attach")
+
+    uploaded_srt2 = st.file_uploader("Subtitl (.srt) faylini yuklang", type=["srt"], key="srt_upload_attach")
+
+    
+
+    if uploaded_video2 and uploaded_srt2:
+
+        video_size_mb = len(uploaded_video2.getvalue()) / (1024 * 1024)
+
+        
+
+        if video_size_mb > 100:
+
+            st.markdown(f"""
+
+            <div class='big-file-warning'>
+
+                <h4>⚠️ Katta video fayli ({video_size_mb:.1f} MB)</h4>
+
+                <p>Subtitl biriktirish biroz vaqt olishi mumkin...</p>
+
+            </div>
+
+            """, unsafe_allow_html=True)
+
+        
+
+        # Unikal fayl nomlari yaratish
+
+        video_filename = generate_unique_filename(uploaded_video2.name, "attach_video")
+
+        srt_filename = generate_unique_filename(uploaded_srt2.name, "attach_srt")
+
+        
+
+        safe_video_filename = get_safe_filename(video_filename)
+
+        safe_srt_filename = get_safe_filename(srt_filename)
+
+        
+
+        video_path = safe_video_filename
+
+        srt_path = safe_srt_filename
+
+        
+
+        with open(video_path, "wb") as f:
+
+            f.write(uploaded_video2.getbuffer())
+
+        
+
+        with open(srt_path, "wb") as f:
+
+            f.write(uploaded_srt2.getbuffer())
+
+        
+
+        st.success(f"✅ Video va subtitl yuklandi! Video hajmi: {video_size_mb:.1f} MB")
+
+        
+
+        st.markdown(f"""
+
+        <div class='file-info'>
+
+            <strong>🎬 Video fayli:</strong> {safe_video_filename}<br>
+
+            <strong>📝 Subtitl fayli:</strong> {safe_srt_filename}<br>
+
+            <strong>📊 Video hajmi:</strong> {video_size_mb:.1f} MB<br>
+
+            <strong>🕐 Yuklangan vaqt:</strong> {datetime.now().strftime("%H:%M:%S")}
+
+        </div>
+
+        """, unsafe_allow_html=True)
+
+        
+
+        if st.button("🔗 Videoga subtitl biriktirish", use_container_width=True):
+
+            with st.spinner("Videoga subtitl biriktirilmoqda..."):
+
+                try:
+
+                    out_path = burn_subtitles(video_path, srt_path)
+
+                    if out_path and os.path.exists(out_path):
+
+                        output_size = get_file_size_mb(out_path)
+
+                        
+
+                        # Chiqish fayli nomi
+
+                        output_filename = generate_unique_filename("video_with_subtitles.mp4", "final")
+
+                        
+
+                        with open(out_path, "rb") as f:
+
+                            st.download_button(
+
+                                f"🎥 Subtitlli videoni yuklab olish ({output_size:.1f} MB)", 
+
+                                f, 
+
+                                file_name=output_filename, 
+
+                                use_container_width=True
+
+                            )
+
+                        
+
+                        st.success("✅ Tayyor!")
+
+                        
+
+                        st.markdown(f"""
+
+                        <div class='file-info'>
+
+                            <strong>🎬 Yakuniy video:</strong> {output_filename}<br>
+
+                            <strong>📊 Hajmi:</strong> {output_size:.1f} MB<br>
+
+                            <strong>✅ Status:</strong> Subtitl muvaffaqiyatli biriktirildi
+
+                        </div>
+
+                        """, unsafe_allow_html=True)
+
+                        
+
+                    else:
+
+                        st.error("Videoga subtitl biriktirishda xatolik.")
+
+                except Exception as e:
+
+                    st.error(f"Xatolik: {str(e)}")
+
+    else:
+
+        st.info("Video va subtitl faylini yuklang.")
+
+
+
+# Footer
+
+st.markdown("---")
+
+st.markdown("<p style='text-align:center; color:#94a3b8;'>© 2024 O‘zbekcha Subtitl Tarjimon | Cheklovsiz fayl yuklash</p>", unsafe_allow_html=True)
+
+
+
+# Sidebar ma'lumotlari
+
+with st.sidebar:
+
+    st.header("ℹ️ Platforma haqida")
+
+    st.info("""
+
+    **Xususiyatlari:**
+
+    - ♾️ Cheksiz fayl hajmi
+
+    - 🎬 Avtomatik subtitl yaratish
+
+    - 🌐 12+ tilga tarjima
+
+    - ✏️ Onlayn tahrirlash
+
+    - ⚡ Tez va ishonchli
+
+    - 📁 Avtomatik fayl nomlari
+
+    """)
+
+    
+
+    st.header("📊 Joriy holat")
+
+    if "current_video" in st.session_state and st.session_state.current_video:
+
+        video_size = get_file_size_mb(st.session_state.current_video)
+
+        st.write(f"🎬 Joriy video: {os.path.basename(st.session_state.current_video)}")
+
+        st.write(f"📊 Hajmi: {video_size:.1f} MB")
+
+    
+
+    if "current_srt" in st.session_state and st.session_state.current_srt:
+
+        srt_size = get_file_size_kb(st.session_state.current_srt)
+
+        st.write(f"📝 Joriy subtitl: {os.path.basename(st.session_state.current_srt)}")
+
+        st.write(f"📊 Hajmi: {srt_size:.1f} KB")
+
+    
+
+    if st.button("🗑️ Barcha fayllarni tozalash"):
+
+        cleanup_temp_files()
+
+        st.session_state.video_files = {}
+
+        st.session_state.srt_files = {}
+
+        st.session_state.current_video = None
+
+        st.session_state.current_srt = None
+
+        st.success("Barcha fayllar tozalandi!")
+
+
+
+# Dastur tugaganda vaqtinchalik fayllarni tozalash
+
+import atexit
+
+atexit.register(cleanup_temp_files)
