@@ -547,7 +547,19 @@ with tab3:
             
             if st.button("🎬 Videoga subtitl qo'shish", use_container_width=True):
                 with st.spinner("Videoga subtitl qo'shilmoqda..."):
-                    try:
+                   
+                        try:
+    out_path = burn_subtitles(temp_video, temp_srt)
+    if out_path and os.path.exists(out_path):
+        # Muvaffaqiyatli
+    else:
+        st.error("Videoga subtitl biriktirish mumkin emas. FFmpeg talab qilinadi.")
+except Exception as e:
+    st.error(f"Videoga subtitl biriktirishda xatolik: {str(e)}")
+    st.info("""
+    **Eslatma:** Videoga subtitl biriktirish faqat lokalda ishlaydi.
+    Streamlit Cloud'da faqat subtitl yaratish va tarjima qilish ishlaydi.
+    """)
                         out_path = burn_subtitles(temp_video, temp_srt)
                         if out_path and os.path.exists(out_path):
                             output_size = get_file_size_mb(out_path)
@@ -636,6 +648,17 @@ with tab4:
         if st.button("🔗 Videoga subtitl biriktirish", use_container_width=True):
             with st.spinner("Videoga subtitl biriktirilmoqda..."):
                 try:
+    out_path = burn_subtitles(temp_video, temp_srt)
+    if out_path and os.path.exists(out_path):
+        # Muvaffaqiyatli
+    else:
+        st.error("Videoga subtitl biriktirish mumkin emas. FFmpeg talab qilinadi.")
+except Exception as e:
+    st.error(f"Videoga subtitl biriktirishda xatolik: {str(e)}")
+    st.info("""
+    **Eslatma:** Videoga subtitl biriktirish faqat lokalda ishlaydi.
+    Streamlit Cloud'da faqat subtitl yaratish va tarjima qilish ishlaydi.
+    """)
                     out_path = burn_subtitles(video_path, srt_path)
                     if out_path and os.path.exists(out_path):
                         output_size = get_file_size_mb(out_path)
@@ -706,4 +729,5 @@ with st.sidebar:
 
 # Dastur tugaganda vaqtinchalik fayllarni tozalash
 import atexit
+
 atexit.register(cleanup_temp_files)
