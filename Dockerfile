@@ -1,22 +1,24 @@
+# Barqaror Python 3.11 versiyasidan foydalanamiz
 FROM python:3.11-slim
 
+# Ishchi katalogni belgilash
 WORKDIR /app
 
-# Install system dependencies
+# Tizim paketlarini yangilash va kerakli instrumentlarni o'rnatish
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
-COPY requirements.txt .
+# Pip-ni yangilash
+RUN pip install --no-cache-dir --upgrade pip
 
-# Install Python dependencies
+# Kutubxonalar ro'yxatini ko'chirib o'tkazish va o'rnatish
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Loyihaning barcha fayllarini konteynerga ko'chirish
 COPY . .
 
-# Run
-CMD ["python", "-m", "bot.main"]
+# Loyihani ishga tushirish buyrug'i
+CMD ["python", "main.py"]
