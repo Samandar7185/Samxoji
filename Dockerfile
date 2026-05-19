@@ -1,22 +1,15 @@
-# Bu qator Render'ga aynan qaysi Python versiyasini 
-# yuklash kerakligini aniq buyuradi (3.11-slim eng barqarori)
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Tizim paketlarini o'rnatish
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Muhim: build-essential va libpq-dev ni o'rnatish
+RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
 
-# Pip va kutubxonalarni o'rnatish
-RUN pip install --no-cache-dir --upgrade pip
+RUN pip install --upgrade pip setuptools wheel
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install -r requirements.txt
 
-# Loyiha fayllarini ko'chirish
 COPY . .
 
-# Botni ishga tushirish
 CMD ["python", "main.py"]
