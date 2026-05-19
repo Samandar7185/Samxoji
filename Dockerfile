@@ -1,24 +1,22 @@
-# Barqaror Python 3.11 versiyasidan foydalanamiz
+# Bu qator Render'ga aynan qaysi Python versiyasini 
+# yuklash kerakligini aniq buyuradi (3.11-slim eng barqarori)
 FROM python:3.11-slim
 
-# Ishchi katalogni belgilash
 WORKDIR /app
 
-# Tizim paketlarini yangilash va kerakli instrumentlarni o'rnatish
+# Tizim paketlarini o'rnatish
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Pip-ni yangilash
+# Pip va kutubxonalarni o'rnatish
 RUN pip install --no-cache-dir --upgrade pip
-
-# Kutubxonalar ro'yxatini ko'chirib o'tkazish va o'rnatish
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Loyihaning barcha fayllarini konteynerga ko'chirish
+# Loyiha fayllarini ko'chirish
 COPY . .
 
-# Loyihani ishga tushirish buyrug'i
+# Botni ishga tushirish
 CMD ["python", "main.py"]
