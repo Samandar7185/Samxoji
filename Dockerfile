@@ -1,22 +1,22 @@
+# Bu qator Render'ga aynan qaysi Python versiyasini 
+# yuklash kerakligini aniq buyuradi (3.11-slim eng barqarori)
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Tizim paketlarini o'rnatish
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
-    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Pip va kutubxonalarni o'rnatish
+RUN pip install --no-cache-dir --upgrade pip
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Loyiha fayllarini ko'chirish
 COPY . .
 
-# Run
-CMD ["python", "-m", "bot.main"]
+# Botni ishga tushirish
+CMD ["python", "main.py"]
