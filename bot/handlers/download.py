@@ -1,9 +1,15 @@
-from aiogram import Router
-from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram import Router, F
+from aiogram.types import CallbackQuery
+from loguru import logger
 
 router = Router()
 
-@router.message(Command("download"))
-async def cmd_download(message: Message):
-    await message.answer("Download funksiyasi hozircha cheklangan. Admin bilan bog'laning.")
+@router.callback_query(F.data.startswith("download_"))
+async def download_callback(callback: CallbackQuery):
+    file_id = callback.data.split("_")[1]
+    await callback.answer("📥 Yuklab olish boshlandi...")
+    await callback.message.answer("✅ Fayl yuborildi! (demo)")
+
+def setup_handlers(dp):
+    dp.include_router(router)
+    logger.success("✅ Download handler ulandi")
