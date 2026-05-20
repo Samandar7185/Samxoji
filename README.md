@@ -1,118 +1,79 @@
 # Kino Hub - Telegram Video Bot
 
-📽️ Telegram botiga video qidirish va yuklash xizmatini taqdim etuvchi platforma.
+🎬 **Telegram botiga kino va anime qidirish va yuklab berish xizmatini taqdim etuvchi platforma.**
 
 ## ✨ Xususiyatlari
 
-- 🔍 **AI Powered Search** - Gemini 1.5 Flash orqali intelligent qidiruv
-- 📥 **Video Download** - Kanallardan videolarni avtomatik yuklash
-- 🗄️ **Smart Database** - PgVector bilan semantik qidiruv
-- ⚡ **Real-time Monitoring** - Kanallardagi yangi videolarni doimiy kuzatish
-- 🤖 **Telegram Integration** - Inline buttons va komfort user interface
+- 🔍 **AI Powered Search** - Google Gemini 1.5 Flash orqali aqlli qidiruv (imlo xatolarini to'g'irlash + semantik tushunish)
+- 📹 **Video Download** - Belgilangan kanallardan videolarni avtomatik yuklab olish
+- 📁 **Smart Database** - PostgreSQL + PgVector bilan semantik qidiruv
+- ⚡ **Real-time Monitoring** - Kanallardagi yangi videolarni doimiy kuzatish (Telethon)
+- 🤖 **Telegram Integration** - Aiogram 3.x, inline tugmalar va qulay interfeys
+- 🌐 **Multilingual** - O'zbek, Rus, Ingliz tillari qo'llab-quvvatlanadi
 
-## 🏗️ Arxitektura
+## 🏭 Arxitektura
 
 ```
-┌─────────────────────────────────────────┐
-│         Telegram Users                  │
-└────────────────┬────────────────────────┘
-                 │
-        ┌────────┴──────────┐
-        │                   │
-    ┌───▼────────┐    ┌─────▼────────┐
-    │   Bot      │    │  Scraper     │
-    │ (Render)   │    │  (Render)    │
-    └───┬────────┘    └─────┬────────┘
-        │                   │
-        └───────────┬───────┘
-                    │
-        ┌───────────┼────────────┐
-        │           │            │
-    ┌───▼───┐  ┌───▼───┐   ┌───▼──┐
-    │ Neon  │  │Redis  │   │ Gemini│
-    │  DB   │  │.io    │   │API    │
-    └───────┘  └───────┘   └──────┘
+├── Bot Service (Aiogram 3.x + Gemini)
+├── Scraper Service (Telethon)
+├── PostgreSQL + PgVector (Neon)
+├── Redis (Upstash)
+└── Gemini 1.5 Flash API
 ```
 
 ## 🚀 O'rnatish
 
 ### Talablar
-- Python 3.9+
+- Python 3.10+
 - Docker & Docker Compose
 - Telegram Bot Token
-- Neon.com account (PostgreSQL)
-- Redis.io account
-- Google Gemini API key
+- Telegram API ID & Hash
+- Neon PostgreSQL (DATABASE_URL)
+- Upstash Redis (REDIS_URL)
+- Google Gemini API Key
 
-### O'rnatish qadamlari
+### Localda ishga tushirish
 
-1. **Repository'ni clone qiling:**
 ```bash
 git clone https://github.com/Samandar7185/Samxoji.git
 cd Samxoji
 git checkout feature/kino-hub-setup
-```
 
-2. **.env faylini yarating:**
-```bash
 cp .env.example .env
-# .env ni o'z ma'lumotlaringiz bilan to'ldiring
-```
+# .env faylini to'ldiring
 
-3. **Docker Compose bilan ishga tushiring:**
-```bash
 docker-compose up -d
 ```
 
-4. **Render'da deploy qiling:**
-- Bot service: https://render.com
-- Scraper service: https://render.com
+### Render.com da deploy qilish
 
-## 📝 Sozlamalar
-
-### GitHub Secrets
-```
-API_HASH
-API_ID
-BOT_TOKEN
-DATABASE_URL
-GEMINI_API_KEY
-REDIS_URL
-RENDER_BOT_DEPLOY_HOOK
-RENDER_SCRAPER_DEPLOY_HOOK
-SCRAPER_PHONE
-CHANNELS_TO_MONITOR
-TELEGRAM_CHAT_ID
-```
+1. Bot service yaratish
+2. Scraper service yaratish
+3. GitHub Secrets da quyidagilarni sozlash:
+   - `RENDER_BOT_DEPLOY_HOOK`
+   - `RENDER_SCRAPER_DEPLOY_HOOK`
 
 ## 🔧 Fayllar Tuzilishi
 
 ```
 Samxoji/
 ├── bot/
-│   ├── __init__.py
 │   ├── main.py
 │   └── handlers/
 │       ├── start.py
 │       ├── search.py
 │       └── download.py
 ├── scraper/
-│   ├── __init__.py
 │   ├── main.py
-│   └── channels.py
+│   └── monitor.py
 ├── database/
-│   ├── __init__.py
-│   ├── models.py
-│   └── connection.py
+│   ├── connection.py
+│   └── models.py
 ├── ai/
-│   ├── __init__.py
-│   └── embeddings.py
+│   └── service.py
 ├── config/
-│   ├── __init__.py
 │   └── settings.py
-├── .github/
-│   └── workflows/
-│       └── deploy.yml
+├── .github/workflows/deploy.yml
 ├── docker-compose.yml
 ├── Dockerfile
 ├── requirements.txt
@@ -120,31 +81,32 @@ Samxoji/
 └── README.md
 ```
 
-## 📖 Qo'llanma
+## 📈 Buyruqlar
 
-### Bot Komandalar
 - `/start` - Botni ishga tushirish
-- `/search <query>` - Video qidiruv
-- `/channels` - Kuzatiladigan kanallar
-- `/stats` - Statistika
+- `/search <query>` - Kino qidirish (Gemini yordamida)
+- Inline tugmalar orqali sifat tanlash (480p/720p/1080p)
 
-## 🛠️ Deployment
+## 🔐 GitHub Secrets
 
-### Local
-```bash
-docker-compose up
 ```
-
-### Render
-1. Bot service
-2. Scraper service
-3. Deploy hooks
-
-## 📧 Bog'lanish
-
-- GitHub: [@Samandar7185](https://github.com/Samandar7185)
-- Telegram: [Kino Hub Bot](https://t.me/your_bot)
+BOT_TOKEN
+API_ID
+API_HASH
+SCRAPER_PHONE
+DATABASE_URL
+REDIS_URL
+GEMINI_API_KEY
+CHANNELS_TO_MONITOR
+TELEGRAM_CHAT_ID
+RENDER_BOT_DEPLOY_HOOK
+RENDER_SCRAPER_DEPLOY_HOOK
+```
 
 ## 📄 Litsenziya
 
 MIT License
+
+---
+
+**Loyiha holati:** ✅ Tayyor (2026-05-20)
