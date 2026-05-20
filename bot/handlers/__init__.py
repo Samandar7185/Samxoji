@@ -8,6 +8,10 @@ def setup_handlers(dp):
     from bot.handlers.ai_chat import setup_handlers as ai_chat_setup
     from bot.handlers.favorites import setup_handlers as favorites_setup
     from bot.handlers.referral import setup_handlers as referral_setup
+    from bot.handlers.admin import setup_handlers as admin_setup
+    from bot.handlers.payment import setup_handlers as payment_setup
+    from bot.handlers.stats import setup_handlers as stats_setup
+    from bot.handlers.broadcast import setup_handlers as broadcast_setup
     
     start_setup(dp)
     search_setup(dp)
@@ -15,5 +19,9 @@ def setup_handlers(dp):
     ai_chat_setup(dp)
     favorites_setup(dp)
     referral_setup(dp)
+    admin_setup(dp)
+    payment_setup(dp)
+    stats_setup(dp)
+    broadcast_setup(dp)
     
-    logger.success("✅ Barcha handlerlar (AI Chat, Favorites, Referral) ulandi")
+    logger.success("✅ Barcha handlerlar (Admin, Payment, Stats, Broadcast) ulandi")
