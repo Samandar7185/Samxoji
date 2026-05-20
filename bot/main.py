@@ -14,7 +14,6 @@ async def main():
     )
     dp = Dispatcher()
 
-    # Barcha handlerlarni ulash
     setup_handlers(dp)
 
     logger.success("🤖 Kino Hub Bot muvaffaqiyatli ishga tushdi!")
