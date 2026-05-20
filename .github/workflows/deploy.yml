@@ -1,32 +1,23 @@
-name: CI - Deploy to Render
+name: Deploy Bot and Scraper
 
 on:
   push:
-    branches:
-      - feature/kino-hub-setup
+    branches: [ main, feature/kino-hub-setup ]
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  deploy-bot:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Trigger Render Bot Deploy Hook
-        if: github.ref == 'refs/heads/feature/kino-hub-setup'
+      - uses: actions/checkout@v4
+      - name: Deploy Bot to Render
         run: |
-          if [ -n "${{ secrets.RENDER_BOT_DEPLOY_HOOK }}" ]; then
-            curl -sSf "${{ secrets.RENDER_BOT_DEPLOY_HOOK }}" -X POST || true
-            echo "Bot deploy hook triggered"
-          else
-            echo "RENDER_BOT_DEPLOY_HOOK not set"
-          fi
+          curl -X POST ${{ secrets.RENDER_BOT_DEPLOY_HOOK }}
 
-      - name: Trigger Render Scraper Deploy Hook
+  deploy-scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Scraper to Render
         run: |
-          if [ -n "${{ secrets.RENDER_SCRAPER_DEPLOY_HOOK }}" ]; then
-            curl -sSf "${{ secrets.RENDER_SCRAPER_DEPLOY_HOOK }}" -X POST || true
-            echo "Scraper deploy hook triggered"
-          else
-            echo "RENDER_SCRAPER_DEPLOY_HOOK not set"
-          fi
+          curl -X POST ${{ secrets.RENDER_SCRAPER_DEPLOY_HOOK }}
