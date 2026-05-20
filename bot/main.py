@@ -1,7 +1,6 @@
 import asyncio
 from aiogram import Bot as AiogramBot
 from aiogram import Dispatcher
-from aiogram.exceptions import TelegramError
 from config.settings import settings
 
 async def main():
@@ -17,8 +16,9 @@ async def main():
     print("🤖 Bot starting...")
     try:
         await dp.start_polling(bot)
-    except TelegramError as e:
-        print(f"Telegram error: {e}")
+    except Exception as e:
+        # aiogram 3.x: catch generic Exception here (TelegramError no longer exported)
+        print(f"Bot runtime error: {e}")
 
 if __name__ == '__main__':
     asyncio.run(main())
