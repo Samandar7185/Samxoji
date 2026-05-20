@@ -12,6 +12,9 @@ def setup_handlers(dp):
     from bot.handlers.payment import setup_handlers as payment_setup
     from bot.handlers.stats import setup_handlers as stats_setup
     from bot.handlers.broadcast import setup_handlers as broadcast_setup
+    from bot.handlers.progress import setup_handlers as progress_setup
+    from bot.handlers.settings import setup_handlers as settings_setup
+    from bot.handlers.back import setup_handlers as back_setup
     
     start_setup(dp)
     search_setup(dp)
@@ -23,5 +26,8 @@ def setup_handlers(dp):
     payment_setup(dp)
     stats_setup(dp)
     broadcast_setup(dp)
+    progress_setup(dp)
+    settings_setup(dp)
+    back_setup(dp)
     
-    logger.success("✅ Barcha tugmali va chiroyli handlerlar ulandi")
+    logger.success("✅ Barcha tugmali, chiroyli va progress handlerlar ulandi")
