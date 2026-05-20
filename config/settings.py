@@ -1,48 +1,52 @@
 # ==================== CONFIG ====================
 from pydantic_settings import BaseSettings
 from functools import lru_cache
-from typing import List, Union
+from typing import List, Optional
+
+import os
 
 class Settings(BaseSettings):
-    BOT_TOKEN: str
-    API_ID: int
-    API_HASH: str
-    SCRAPER_PHONE: str = ""
+    # Telegram (optional for non-bot services)
+    BOT_TOKEN: Optional[str] = None
+    API_ID: Optional[int] = None
+    API_HASH: Optional[str] = None
+    SCRAPER_PHONE: Optional[str] = None
 
+    # Database / infra
     DATABASE_URL: str
-    REDIS_URL: str
-    GEMINI_API_KEY: str = ""
+    REDIS_URL: Optional[str] = None
+    GEMINI_API_KEY: Optional[str] = None
 
     CHANNELS_TO_MONITOR: str = ""
-    TELEGRAM_CHAT_ID: int = 0
+    TELEGRAM_CHAT_ID: Optional[int] = None
 
     class Config:
         env_file = ".env"
         env_file_encoding = 'utf-8'
 
-
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
 
-
 settings = get_settings()
 
-# Parse CHANNELS_TO_MONITOR into a list of ints or strings.
-# Supports values like: "1001234567890,1009876543210" or "@channel_username,12345"
-MONITORED_CHANNELS: List[Union[int, str]] = []
-raw_channels = (settings.CHANNELS_TO_MONITOR or "").strip()
-if raw_channels:
-    for part in raw_channels.split(','):
-        ch = part.strip()
-        if not ch:
+# Parse CHANNELS_TO_MONITOR into a list of integer IDs (ignore @usernames)
+def _parse_channels(value: str) -> List[int]:
+    out: List[int] = []
+    if not value:
+        return out
+    for part in value.split(","):
+        p = part.strip()
+        if not p:
             continue
-        # numeric id
-        if ch.lstrip('-').isdigit():
-            try:
-                MONITORED_CHANNELS.append(int(ch))
-            except ValueError:
-                MONITORED_CHANNELS.append(ch)
-        else:
-            # allow usernames like @channel
-            MONITORED_CHANNELS.append(ch)
+        # Skip username-like entries (@username)
+        if p.startswith("@"):
+            continue
+        try:
+            out.append(int(p))
+        except ValueError:
+            # not an integer, skip
+            continue
+    return out
+
+MONITORED_CHANNELS = _parse_channels(settings.CHANNELS_TO_MONITOR)
