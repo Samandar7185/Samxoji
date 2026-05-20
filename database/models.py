@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Float
+from sqlalchemy import Column, Integer, String, Text, DateTime, Float, BigInteger
 from sqlalchemy.sql import func
 from database.connection import Base
 
@@ -13,11 +13,11 @@ class Video(Base):
     description = Column(Text, nullable=True)
     channel_id = Column(String, index=True)
     message_id = Column(Integer)
-    quality = Column(String)  # 480p, 720p, 1080p
+    quality = Column(String)
     language = Column(String)
     duration = Column(Integer)
     size = Column(Float)
-    embedding = Column(Text)  # JSON string of embedding vector
+    embedding = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class User(Base):
@@ -26,5 +26,5 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     telegram_id = Column(BigInteger, unique=True, index=True)
     language = Column(String, default="uz")
-    favorites = Column(Text, default="[]")  # JSON list
+    favorites = Column(Text, default="[]")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
