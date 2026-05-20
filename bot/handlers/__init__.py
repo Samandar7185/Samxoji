@@ -24,4 +24,4 @@ def setup_handlers(dp):
     stats_setup(dp)
     broadcast_setup(dp)
     
-    logger.success("✅ Barcha handlerlar (Admin, Payment, Stats, Broadcast) ulandi")
+    logger.success("✅ Barcha tugmali va chiroyli handlerlar ulandi")
